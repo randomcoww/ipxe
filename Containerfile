@@ -1,6 +1,5 @@
 FROM alpine:latest as BUILD
-
-ARG VERSION
+ARG VERSION=master
 
 RUN set -x \
   \

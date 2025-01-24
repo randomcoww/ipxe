@@ -1,8 +1,6 @@
 ### PXE images served over TFTP
 
-ipxe.efi and undionly.kpxe served over TFTP-HPA
-
-PXE images built to support:
+PXE images built to support
 
 ```
 DNS
@@ -19,7 +17,7 @@ EFI
 Menu
 ```
 
-### Image build
+No version tags from source
 
 ```bash
 TAG=v$(date -u +'%Y%m%d').1

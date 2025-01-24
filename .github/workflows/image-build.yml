@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: arc-runner-code-server
+    runs-on: arc-runner-tftpd-ipxe
     container:
       image: gcr.io/kaniko-project/executor:debug
     permissions:

@@ -1,4 +1,4 @@
-### PXE images served over TFTP
+### Container for TFTPD serving iPXE images
 
 PXE images built to support
 

@@ -1,4 +1,6 @@
-### Container for TFTPD serving iPXE images
+### Container for iPXE images served over TFTP
+
+https://github.com/ipxe/ipxe
 
 PXE images built to support
 

@@ -5,9 +5,14 @@
 name: Image Build
 on:
   workflow_dispatch:
+  schedule:
+  - cron: "0 3 * * 0"
   push:
-    tags:
-      - v*
+    paths-ignore:
+    - .github/**
+    - README.md
+    branches:
+    - master
 
 jobs:
   build:
@@ -33,5 +38,5 @@ jobs:
         /kaniko/executor \
           --dockerfile="./Containerfile" \
           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
-          --destination="ghcr.io/${{ github.repository }}:${{ github.head_ref || github.ref_name }}" \
+          --destination="ghcr.io/${{ github.repository }}:v$(date -u +'%Y%m%d.%H%M')" \
           --push-retry 3

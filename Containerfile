@@ -14,7 +14,7 @@ RUN set -x \
     openssl \
     coreutils \
   \
-  && git clone -b $VERSION https://github.com/ipxe/ipxe /ipxe
+  && git clone --depth 1 -b $VERSION https://github.com/ipxe/ipxe /ipxe
 
 WORKDIR /ipxe/src
 COPY config/ config/local/

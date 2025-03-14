@@ -68,10 +68,9 @@ jobs:
         cp -r $HOME/project/config/. config/local/
         make \
           bin-$(arch)-efi/ipxe.efi \
-          CERT=matchbox-client-full.pem \
-          TRUST=matchbox-ca.pem \
-          PRIVKEY=matchbox-client-key.pem \
-          DEBUG=tls,x509,certstore
+          CERT=matchbox-ca.pem \
+          TRUST=matchbox-ca.pem
+          DEBUG=x509,certstore
 
         mkdir -p $HOME/build
         mv bin-$(arch)-efi/*.efi $HOME/build/

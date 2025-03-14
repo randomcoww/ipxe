@@ -13,7 +13,7 @@ RUN set -x \
   && terraform apply -auto-approve
 
 FROM alpine:latest as BUILD
-ARG COMMIT=bd90abf487a6b0500f457193f86ff54fd2be3143
+ARG COMMIT
 
 RUN set -x \
   \
@@ -42,7 +42,7 @@ RUN set -x \
     bin-$(arch)-efi/ipxe.efi \
     CERT=matchbox-ca.crt TRUST=matchbox-ca.crt \
   && mkdir -p /build \
-  && mv ipxe/src/bin-$(arch)-efi/*.efi /build/
+  && mv bin-$(arch)-efi/*.efi /build/
 
 FROM alpine:latest
 

@@ -12,6 +12,9 @@ on:
     branches:
     - master
 
+env:
+  COMMIT: bd90abf487a6b0500f457193f86ff54fd2be3143
+
 jobs:
   build:
     runs-on: arc-runner-${{ github.event.repository.name }}
@@ -36,7 +39,8 @@ jobs:
         /kaniko/executor \
           --dockerfile="./Containerfile" \
           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
-          --destination="ghcr.io/${{ github.repository }}:v$(date -u +'%Y%m%d.%H%M')" \
+          --destination="ghcr.io/${{ github.repository }}:$COMMIT" \
+          --build-arg COMMIT=$COMMIT \
           --build-arg AWS_ENDPOINT_URL_S3=$AWS_ENDPOINT_URL_S3 \
           --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
           --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \

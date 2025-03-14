@@ -40,7 +40,7 @@ RUN set -x \
     bin-$(arch)-efi/ipxe.efi \
     CERT=matchbox-ca.pem \
     TRUST=matchbox-ca.pem \
-    DEBUG=x509,certstore
+    DEBUG=x509,certstore \
   \
   && mkdir -p /build \
   && mv bin-$(arch)-efi/*.efi /build/

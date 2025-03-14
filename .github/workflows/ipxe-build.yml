@@ -70,7 +70,7 @@ jobs:
           bin-$(arch)-efi/ipxe.efi \
           CERT=matchbox-ca.pem \
           TRUST=matchbox-ca.pem \
-          DEBUG=x509:2
+          DEBUG=tls,x509,certstore,privkey
 
         mkdir -p $HOME/build
         mv bin-$(arch)-efi/*.efi $HOME/build/

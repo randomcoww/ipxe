@@ -1,8 +1,14 @@
 FROM hashicorp/terraform:latest as TF
 COPY matchbox_ca.tf .
+ARG AWS_ENDPOINT_URL_S3
+ARG AWS_ACCESS_KEY_ID
+ARG AWS_SECRET_ACCESS_KEY
 
 RUN set -x \
   \
+  && AWS_ENDPOINT_URL_S3=$AWS_ENDPOINT_URL_S3 \
+  && AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+  && AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
   && terraform init \
   && terraform apply -auto-approve
 

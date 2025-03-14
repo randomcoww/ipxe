@@ -64,7 +64,7 @@ jobs:
         cp -r $HOME/project/config/. config/local/
         make \
           bin-$(arch)-efi/ipxe.efi \
-          DEBUG=x509 \
+          DEBUG=tls,x509:3,certstore,privkey \
           TRUST=matchbox-ca.crt
 
         mkdir -p $HOME/build

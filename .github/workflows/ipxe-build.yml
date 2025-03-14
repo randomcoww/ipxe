@@ -63,13 +63,13 @@ jobs:
         cp $HOME/project/matchbox-ca.pem .
         cp $HOME/project/matchbox-client-cert.pem .
         cp $HOME/project/matchbox-client-key.pem .
-        cat matchbox-client-cert.pem matchbox-ca.pem > matchbox-client-full.pem
 
         cp -r $HOME/project/config/. config/local/
         make \
           bin-$(arch)-efi/ipxe.efi \
-          CERT=matchbox-ca.pem \
+          CERT=matchbox-client-cert.pem,matchbox-ca.pem \
           TRUST=matchbox-ca.pem \
+          PRIVKEY=matchbox-client-key.pem \
           DEBUG=tls,x509,certstore,privkey
 
         mkdir -p $HOME/build

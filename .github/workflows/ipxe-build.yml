@@ -1,0 +1,76 @@
+name: iPXE Build
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+    - .github/**
+    - README.md
+    branches:
+    - master
+
+env:
+  VERSION: master
+
+jobs:
+  build:
+    runs-on: arc-runner-${{ github.event.repository.name }}
+    container:
+      image: docker.io/alpine:latest
+    permissions:
+      contents: read
+    steps:
+    - name: Install dependencies
+      run: |
+        cd $HOME
+        apk add --no-cache \
+          g++ \
+          xz-dev \
+          make \
+          perl \
+          bash \
+          cdrkit \
+          git \
+          openssl \
+          coreutils \
+          unzip
+
+        TARGETARCH=$(arch)
+        TARGETARCH=${TARGETARCH/x86_64/amd64} && TARGETARCH=${TARGETARCH/aarch64/arm64}
+
+        wget https://dl.min.io/client/mc/release/linux-$TARGETARCH/mc \
+          -O mc
+        chmod +x mc
+
+        TF_VERSION=$(wget -O - https://api.github.com/repos/hashicorp/terraform/releases/latest |grep tag_name | cut -d '"' -f 4 | tr -d 'v')
+        wget https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_$TARGETARCH.zip \
+          -O terraform.zip
+        unzip -j terraform.zip terraform
+        rm terraform.zip
+
+    - name: Generate CA
+      run: |
+        cd $HOME
+        git clone ${{ github.server_url }}/${{ github.repository }}.git project
+        cd project
+
+        $HOME/terraform init
+        $HOME/terraform apply -auto-approve
+
+    - name: Build iPXE
+      run: |
+        cd $HOME
+        git clone --depth 1 -b $VERSION https://github.com/ipxe/ipxe /ipxe
+        cd /ipxe/src
+
+        cp $HOME/project/matchbox-ca.crt .
+        cp -r $HOME/project/config/. config/local/
+        make \
+          bin-$(arch)-efi/ipxe.efi \
+          CERT=matchbox-ca.crt TRUST=matchbox-ca.crt
+
+    - name: Push image
+      run: |
+        cd $HOME
+        ./mc cp -r -q --no-color \
+          ipxe/src/bin-$(arch)-efi/ipxe.efi \
+          arc/data-boot/

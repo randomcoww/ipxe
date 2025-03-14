@@ -1,3 +1,11 @@
+FROM hashicorp/terraform:latest as TF
+COPY matchbox_ca.tf .
+
+RUN set -x \
+  \
+  && terraform init \
+  && terraform apply -auto-approve
+
 FROM alpine:latest as BUILD
 ARG VERSION=master
 
@@ -18,14 +26,13 @@ RUN set -x \
 
 WORKDIR /ipxe/src
 COPY config/ config/local/
+COPY --from=TF matchbox-ca.crt .
 
 RUN set -x \
   \
-  && wget -O ca.crt https://ipxe.org/_media/certs/ca.crt \
-  && CERT=ca.crt TRUST=ca.crt make -j "$(getconf _NPROCESSORS_ONLN)" \
+  && make \
     bin-x86_64-efi/ipxe.efi \
-    bin-x86_64-efi/snp.efi \
-    bin-x86_64-efi/snponly.efi
+    CERT=matchbox-ca.crt TRUST=matchbox-ca.crt
 
 FROM alpine:latest
 

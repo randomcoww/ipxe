@@ -66,9 +66,11 @@ jobs:
           bin-$(arch)-efi/ipxe.efi \
           CERT=matchbox-ca.crt TRUST=matchbox-ca.crt
 
+        mkdir -p $HOME/build
+        mv bin-$(arch)-efi/*.efi $HOME/build/
+
     - name: Push images
       run: |
         cd $HOME
-        ./mc cp -r -q --no-color \
-          ipxe/src/bin-$(arch)-efi/*.efi \
-          arc/data-boot/
+        ./mc cp -q --no-color \
+          build/*.efi arc/data-boot/

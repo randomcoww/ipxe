@@ -7,7 +7,7 @@ RUN set -x \
   && terraform apply -auto-approve
 
 FROM alpine:latest as BUILD
-ARG VERSION=master
+ARG COMMIT=bd90abf487a6b0500f457193f86ff54fd2be3143
 
 RUN set -x \
   \
@@ -22,7 +22,9 @@ RUN set -x \
     openssl \
     coreutils \
   \
-  && git clone --depth 1 -b $VERSION https://github.com/ipxe/ipxe /ipxe
+  && git clone -b master https://github.com/ipxe/ipxe /ipxe \
+  && cd /ipxe \
+  && git reset --hard $COMMIT
 
 WORKDIR /ipxe/src
 COPY config/ config/local/
@@ -31,14 +33,15 @@ COPY --from=TF matchbox-ca.crt .
 RUN set -x \
   \
   && make \
-    bin-x86_64-efi/ipxe.efi \
-    CERT=matchbox-ca.crt TRUST=matchbox-ca.crt
+    bin-$(arch)-efi/ipxe.efi \
+    CERT=matchbox-ca.crt TRUST=matchbox-ca.crt \
+  && mkdir -p /build \
+  && mv ipxe/src/bin-$(arch)-efi/*.efi /build/
 
 FROM alpine:latest
 
 WORKDIR /var/tftpboot
-COPY --from=BUILD --chown=nobody:nogroup \
-  /ipxe/src/bin-x86_64-efi/*.efi .
+COPY --from=BUILD --chown=nobody:nogroup /build/ .
 
 RUN set -x \
   \

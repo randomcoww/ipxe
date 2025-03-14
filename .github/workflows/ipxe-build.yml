@@ -1,15 +1,9 @@
 name: iPXE Build
 on:
   workflow_dispatch:
-  push:
-    paths-ignore:
-    - .github/**
-    - README.md
-    branches:
-    - master
 
 env:
-  VERSION: master
+  COMMIT: bd90abf487a6b0500f457193f86ff54fd2be3143
 
 jobs:
   build:
@@ -59,9 +53,11 @@ jobs:
     - name: Build iPXE
       run: |
         cd $HOME
-        git clone --depth 1 -b $VERSION https://github.com/ipxe/ipxe /ipxe
-        cd /ipxe/src
+        git clone -b master https://github.com/ipxe/ipxe /ipxe
+        cd /ipxe
+        git reset --hard $COMMIT
 
+        cd /ipxe/src
         cp $HOME/project/matchbox-ca.crt .
         cp -r $HOME/project/config/. config/local/
         make \

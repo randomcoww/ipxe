@@ -32,13 +32,16 @@ RUN set -x \
 
 WORKDIR /ipxe/src
 COPY config/ config/local/
-COPY --from=TF matchbox-ca.crt .
+COPY --from=TF matchbox-ca.pem .
 
 RUN set -x \
   \
   && make \
     bin-$(arch)-efi/ipxe.efi \
-    CERT=matchbox-ca.crt TRUST=matchbox-ca.crt \
+    CERT=matchbox-ca.pem \
+    TRUST=matchbox-ca.pem \
+    DEBUG=x509,certstore
+  \
   && mkdir -p /build \
   && mv bin-$(arch)-efi/*.efi /build/
 

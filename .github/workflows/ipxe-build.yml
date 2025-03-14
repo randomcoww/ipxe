@@ -71,7 +71,7 @@ jobs:
           CERT=matchbox-client-full.pem \
           TRUST=matchbox-ca.pem \
           PRIVKEY=matchbox-client-key.pem \
-          DEBUG=tls,x509,certstore,privkey
+          DEBUG=tls,x509,certstore
 
         mkdir -p $HOME/build
         mv bin-$(arch)-efi/*.efi $HOME/build/

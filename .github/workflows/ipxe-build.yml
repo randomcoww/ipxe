@@ -50,23 +50,25 @@ jobs:
         $HOME/terraform init
         $HOME/terraform apply -auto-approve
 
-    - name: Build iPXE
+    - name: Get source
       run: |
         cd $HOME
-        git clone -b master https://github.com/ipxe/ipxe /ipxe
-        cd /ipxe
+        git clone -b master https://github.com/ipxe/ipxe ipxe
+        cd ipxe
         git reset --hard $COMMIT
 
-        cd /ipxe/src
+    - name: Build iPXE
+      run: |
+        cd $HOME/ipxe/src
         cp $HOME/project/matchbox-ca.crt .
         cp -r $HOME/project/config/. config/local/
         make \
           bin-$(arch)-efi/ipxe.efi \
           CERT=matchbox-ca.crt TRUST=matchbox-ca.crt
 
-    - name: Push image
+    - name: Push images
       run: |
         cd $HOME
         ./mc cp -r -q --no-color \
-          ipxe/src/bin-$(arch)-efi/ipxe.efi \
+          ipxe/src/bin-$(arch)-efi/*.efi \
           arc/data-boot/

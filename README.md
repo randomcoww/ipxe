@@ -1,4 +1,4 @@
-### Container for iPXE images served over TFTP
+### Container for iPXE images served over TFTP or HTTP
 
 https://github.com/ipxe/ipxe
 

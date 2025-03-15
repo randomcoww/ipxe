@@ -18,7 +18,7 @@ jobs:
       contents: read
       packages: write
     steps:
-    - name: Build and release container
+    - name: Write push credentials
       run: |
         cat > $DOCKER_CONFIG/config.json <<EOF
         {
@@ -30,12 +30,29 @@ jobs:
         }
         EOF
 
+    - name: Build and release TFTP container
+      run: |
         /kaniko/executor \
           --dockerfile="./Containerfile" \
           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
-          --destination="ghcr.io/${{ github.repository }}:v$(date -u +'%Y%m%d.%H%M')" \
+          --destination="ghcr.io/${{ github.repository }}:v$(date -u +'%Y%m%d.%H%M')-tftp" \
           --build-arg COMMIT=$COMMIT \
           --build-arg AWS_ENDPOINT_URL_S3=$AWS_ENDPOINT_URL_S3 \
           --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
           --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+          --target TFTP \
+          --push-retry 3 \
+          --cleanup
+
+    - name: Build and release HTTP container
+      run: |
+        /kaniko/executor \
+          --dockerfile="./Containerfile" \
+          --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
+          --destination="ghcr.io/${{ github.repository }}:v$(date -u +'%Y%m%d.%H%M')-http" \
+          --build-arg COMMIT=$COMMIT \
+          --build-arg AWS_ENDPOINT_URL_S3=$AWS_ENDPOINT_URL_S3 \
+          --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+          --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+          --target HTTP \
           --push-retry 3

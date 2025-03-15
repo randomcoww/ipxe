@@ -1,13 +1,16 @@
-FROM hashicorp/terraform:latest as TF
+FROM hashicorp/terraform:latest as CA
 COPY matchbox_ca.tf .
+
 ARG AWS_ENDPOINT_URL_S3
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
+ENV AWS_ENDPOINT_URL_S3=$AWS_ENDPOINT_URL_S3
+ENV AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+ENV AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 
-RUN terraform init \
-  && AWS_ENDPOINT_URL_S3=$AWS_ENDPOINT_URL_S3 \
-  && AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-  && AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+RUN set -x \
+  \
+  && terraform init \
   && terraform apply -auto-approve
 
 FROM alpine:latest as BUILD
@@ -32,7 +35,7 @@ RUN set -x \
 
 WORKDIR /ipxe/src
 COPY config/ config/local/
-COPY --from=TF matchbox-ca.pem .
+COPY --from=CA matchbox-ca.pem .
 
 RUN set -x \
   \
@@ -45,7 +48,7 @@ RUN set -x \
   && mkdir -p /build \
   && mv bin-$(arch)-efi/*.efi /build/
 
-FROM alpine:latest
+FROM alpine:latest as TFTP
 
 WORKDIR /var/tftpboot
 COPY --from=BUILD --chown=nobody:nogroup /build/ .
@@ -56,3 +59,6 @@ RUN set -x \
     tftp-hpa
 
 ENTRYPOINT [ "in.tftpd", "--foreground", "--user", "nobody", "--secure", "/var/tftpboot" ]
+
+FROM nginx:stable-alpine as HTTP
+COPY --from=BUILD /build/ /usr/share/nginx/html/

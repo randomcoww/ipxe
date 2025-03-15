@@ -10,7 +10,7 @@ env:
   COMMIT: bd90abf487a6b0500f457193f86ff54fd2be3143
 
 jobs:
-  build:
+  build-tftp:
     runs-on: arc-runner-${{ github.event.repository.name }}
     container:
       image: gcr.io/kaniko-project/executor:debug
@@ -18,7 +18,7 @@ jobs:
       contents: read
       packages: write
     steps:
-    - name: Write push credentials
+    - name: Build and release TFTP container
       run: |
         cat > $DOCKER_CONFIG/config.json <<EOF
         {
@@ -30,8 +30,6 @@ jobs:
         }
         EOF
 
-    - name: Build and release TFTP container
-      run: |
         /kaniko/executor \
           --dockerfile="./Containerfile" \
           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
@@ -41,11 +39,28 @@ jobs:
           --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
           --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
           --target TFTP \
-          --push-retry 3 \
-          --cleanup
+          --push-retry 3
 
+  build-http:
+    runs-on: arc-runner-${{ github.event.repository.name }}
+    container:
+      image: gcr.io/kaniko-project/executor:debug
+    permissions:
+      contents: read
+      packages: write
+    steps:
     - name: Build and release HTTP container
       run: |
+        cat > $DOCKER_CONFIG/config.json <<EOF
+        {
+          "auths": {
+            "ghcr.io": {
+              "auth": "$(echo -n ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} | base64 -w0)"
+            }
+          }
+        }
+        EOF
+
         /kaniko/executor \
           --dockerfile="./Containerfile" \
           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \

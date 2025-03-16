@@ -5,6 +5,12 @@
 name: Image Build
 on:
   workflow_dispatch:
+  push:
+    paths-ignore:
+    - .github/**
+    - README.md
+    branches:
+    - master
 
 env:
   COMMIT: bd90abf487a6b0500f457193f86ff54fd2be3143

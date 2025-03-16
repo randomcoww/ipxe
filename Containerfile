@@ -48,6 +48,8 @@ RUN set -x \
   && mkdir -p /build \
   && mv bin-$(arch)-efi/*.efi /build/
 
+## PXE boot build
+
 FROM alpine:latest as TFTP
 
 WORKDIR /var/tftpboot
@@ -60,5 +62,11 @@ RUN set -x \
 
 ENTRYPOINT [ "in.tftpd", "--foreground", "--user", "nobody", "--secure", "/var/tftpboot" ]
 
-FROM nginx:stable-alpine as HTTP
-COPY --from=BUILD /build/ /usr/share/nginx/html/
+## HTTP boot build
+
+FROM busybox:stable-musl as HTTP
+
+WORKDIR /var/www
+COPY --from=BUILD --chown=www-data:www-data /build/ .
+
+ENTRYPOINT [ "httpd", "-f", "-v" ]

@@ -68,5 +68,6 @@ FROM busybox:stable-musl as HTTP
 
 WORKDIR /var/www
 COPY --from=BUILD --chown=www-data:www-data /build/ .
+USER www-data
 
 ENTRYPOINT [ "httpd", "-f", "-v" ]

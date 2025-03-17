@@ -11,7 +11,8 @@ ENV AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 RUN set -x \
   \
   && terraform init \
-  && terraform apply -auto-approve
+  && terraform apply -auto-approve \
+  && cat outputs/* > ca-cert.pem
 
 FROM alpine:latest as BUILD
 ARG COMMIT
@@ -35,15 +36,14 @@ RUN set -x \
 
 WORKDIR /ipxe/src
 COPY config/ config/local/
-COPY --from=CA matchbox-ca.pem .
-COPY --from=CA minio-ca.pem .
+COPY --from=CA ca-cert.pem .
 
 RUN set -x \
   \
   && make \
     bin-$(arch)-efi/ipxe.efi \
-    CERT=matchbox-ca.pem,minio-ca.pem \
-    TRUST=matchbox-ca.pem,minio-ca.pem \
+    CERT=mca-cert.pem \
+    TRUST=ca-cert.pem \
     DEBUG=x509,certstore \
   \
   && mkdir -p /build \

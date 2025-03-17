@@ -42,7 +42,7 @@ RUN set -x \
   \
   && make \
     bin-$(arch)-efi/ipxe.efi \
-    CERT=mca-cert.pem \
+    CERT=ca-cert.pem \
     TRUST=ca-cert.pem \
     DEBUG=x509,certstore \
   \

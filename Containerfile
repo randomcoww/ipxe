@@ -1,5 +1,5 @@
 FROM hashicorp/terraform:latest as CA
-COPY matchbox_ca.tf .
+COPY trusted_ca.tf .
 
 ARG AWS_ENDPOINT_URL_S3
 ARG AWS_ACCESS_KEY_ID
@@ -36,13 +36,14 @@ RUN set -x \
 WORKDIR /ipxe/src
 COPY config/ config/local/
 COPY --from=CA matchbox-ca.pem .
+COPY --from=CA minio-ca.pem .
 
 RUN set -x \
   \
   && make \
     bin-$(arch)-efi/ipxe.efi \
-    CERT=matchbox-ca.pem \
-    TRUST=matchbox-ca.pem \
+    CERT=matchbox-ca.pem,minio-ca.pem \
+    TRUST=matchbox-ca.pem,minio-ca.pem \
     DEBUG=x509,certstore \
   \
   && mkdir -p /build \

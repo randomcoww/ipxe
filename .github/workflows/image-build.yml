@@ -49,19 +49,12 @@ jobs:
           --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
           --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
           --target HTTP \
-          --push-retry 3
+          --push-retry 3 \
+          --cleanup
 
-    - name: Build and release TFTP container
-      run: |
-        cat > $DOCKER_CONFIG/config.json <<EOF
-        {
-          "auths": {
-            "ghcr.io": {
-              "auth": "$(echo -n ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} | base64 -w0)"
-            }
-          }
-        }
-        EOF
+        rm -rf /kaniko/*[0-9]*
+        rm -f /kaniko/Containerfile
+        mkdir -p /workspace
 
         /kaniko/executor \
           --dockerfile="./Containerfile" \

@@ -2,7 +2,7 @@
 # https://some-natalie.dev/blog/kaniko-in-arc/
 # https://dev.to/ipo/using-kaniko-to-build-and-publish-container-image-with-github-action-on-github-self-hosted-runners-d5m
 
-name: Image Build
+name: TFTP Image Build
 on:
   workflow_dispatch:
   push:
@@ -43,11 +43,10 @@ jobs:
         /kaniko/executor \
           --dockerfile="./Containerfile" \
           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
-          --destination="ghcr.io/${{ github.repository }}:v$TAG" \
+          --destination="ghcr.io/${{ github.repository }}:v$TAG-tftp" \
           --build-arg COMMIT=$COMMIT \
           --build-arg AWS_ENDPOINT_URL_S3=$AWS_ENDPOINT_URL_S3 \
           --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
           --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-          --target HTTP \
-          --push-retry 3 \
-          --cleanup
+          --target TFTP \
+          --push-retry 3

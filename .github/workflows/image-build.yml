@@ -5,6 +5,8 @@
 name: Image Build
 on:
   workflow_dispatch:
+  schedule:
+  - cron: "0 21 1 * *"
   push:
     paths-ignore:
     - .github/**

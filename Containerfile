@@ -1,4 +1,4 @@
-FROM hashicorp/terraform:latest as CA
+FROM hashicorp/terraform:latest as certs
 COPY trusted_ca.tf .
 
 ARG AWS_ENDPOINT_URL_S3
@@ -14,7 +14,7 @@ RUN set -x \
   && terraform apply -auto-approve \
   && cat outputs/* > ca-cert.pem
 
-FROM alpine:latest as BUILD
+FROM alpine:latest as build
 ARG COMMIT
 
 RUN set -x \
@@ -36,7 +36,7 @@ RUN set -x \
 
 WORKDIR /ipxe/src
 COPY config/ config/local/
-COPY --from=CA ca-cert.pem .
+COPY --from=certs ca-cert.pem .
 
 RUN set -x \
   \
@@ -51,10 +51,10 @@ RUN set -x \
 
 ## PXE boot build
 
-FROM alpine:latest as TFTP
+FROM alpine:latest as tftp
 
 WORKDIR /var/tftpboot
-COPY --from=BUILD --chown=nobody:nogroup /build/ .
+COPY --from=build --chown=nobody:nogroup /build/ .
 
 RUN set -x \
   \
@@ -65,10 +65,10 @@ ENTRYPOINT [ "in.tftpd", "--foreground", "--user", "nobody", "--secure", "/var/t
 
 ## HTTP boot build
 
-FROM busybox:stable-musl as HTTP
+FROM busybox:stable-musl as http
 
 WORKDIR /var/www
-COPY --from=BUILD --chown=www-data:www-data /build/ .
+COPY --from=build --chown=www-data:www-data /build/ .
 USER www-data
 
 ENTRYPOINT [ "httpd", "-f", "-v" ]

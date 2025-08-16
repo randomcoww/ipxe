@@ -21,7 +21,7 @@ jobs:
   build:
     runs-on: arc-runner-${{ github.event.repository.name }}
     container:
-      image: gcr.io/kaniko-project/executor:debug
+      image: ghcr.io/randomcoww/kaniko:debug
     permissions:
       contents: read
       packages: write
@@ -51,12 +51,13 @@ jobs:
           --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
           --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
           --skip-unused-stages \
-          --target HTTP \
+          --target http \
+          --cache \
           --push-retry 3
   build-tftp:
     runs-on: arc-runner-${{ github.event.repository.name }}
     container:
-      image: gcr.io/kaniko-project/executor:debug
+      image: ghcr.io/randomcoww/kaniko:debug
     permissions:
       contents: read
       packages: write
@@ -86,7 +87,8 @@ jobs:
           --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
           --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
           --skip-unused-stages \
-          --target TFTP \
+          --target tftp \
+          --cache \
           --push-retry 3
   cleanup:
     needs:

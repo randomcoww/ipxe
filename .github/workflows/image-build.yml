@@ -69,10 +69,6 @@ jobs:
     env:
       TAG: ${{needs.build.outputs.TAG}}
     steps:
-    - name: Set tag
-      run: |
-        echo TAG=$(date -u +'%Y%m%d.%H%M') | tee -a "$GITHUB_ENV"
-
     - name: Build and release container
       run: |
         mkdir -p $DOCKER_CONFIG

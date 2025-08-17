@@ -28,7 +28,9 @@ jobs:
     steps:
     - name: Set tag
       run: |
-        echo TAG=$(date -u +'%Y%m%d.%H%M') | tee -a "$GITHUB_ENV"
+        TAG=$(date -u +'%Y%m%d.%H%M')
+        echo TAG=$TAG | tee -a "$GITHUB_ENV"
+        echo TAG=$TAG | tee -a "$GITHUB_OUTPUT"
 
     - name: Build and release container
       run: |
@@ -56,12 +58,16 @@ jobs:
           --cache \
           --push-retry 3
   build-tftp:
+    needs:
+      - build
     runs-on: arc-runner-${{ github.event.repository.name }}
     container:
       image: ghcr.io/randomcoww/kaniko:debug
     permissions:
       contents: read
       packages: write
+    env:
+      TAG: ${{needs.build.outputs.TAG}}
     steps:
     - name: Set tag
       run: |

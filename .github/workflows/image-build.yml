@@ -66,8 +66,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    env:
-      TAG: ${{needs.build.outputs.TAG}}
     steps:
     - name: Build and release container
       run: |
@@ -85,7 +83,7 @@ jobs:
         /kaniko/executor \
           --dockerfile="./Containerfile" \
           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
-          --destination="ghcr.io/${{ github.repository }}:v$TAG-tftp" \
+          --destination="ghcr.io/${{ github.repository }}:v${{needs.build.outputs.TAG}}-tftp" \
           --build-arg COMMIT=$COMMIT \
           --build-arg AWS_ENDPOINT_URL_S3=$AWS_ENDPOINT_URL_S3 \
           --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \

@@ -39,12 +39,6 @@ jobs:
       contents: read
       packages: write
     steps:
-    - name: Set tag
-      run: |
-        TAG=$(date -u +'%Y%m%d.%H%M')
-        echo TAG=$TAG | tee -a "$GITHUB_ENV"
-        echo TAG=$TAG | tee -a "$GITHUB_OUTPUT"
-
     - name: Build and release container
       run: |
         mkdir -p $DOCKER_CONFIG

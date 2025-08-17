@@ -62,7 +62,6 @@ jobs:
           --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
           --skip-unused-stages \
           --target http \
-          --cache \
           --push-retry 3
   build-tftp:
     needs:
@@ -97,7 +96,6 @@ jobs:
           --build-arg AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
           --skip-unused-stages \
           --target tftp \
-          --cache \
           --push-retry 3
   cleanup:
     needs:

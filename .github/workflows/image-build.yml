@@ -23,9 +23,10 @@ jobs:
     container:
       image: docker.io/library/busybox:latest
     outputs:
-      tag: ${{ steps.tag.outputs.TAG }}
+      timestamp: ${{ steps.tag.outputs.TAG }}
     steps:
     - name: Set tag
+      id: tag
       run: |
         echo TAG=$(date -u +'%Y%m%d.%H%M') | tee -a "$GITHUB_OUTPUT"
   build:
@@ -60,7 +61,7 @@ jobs:
         /kaniko/executor \
           --dockerfile="./Containerfile" \
           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
-          --destination="ghcr.io/${{ github.repository }}:v${{needs.tag.outputs.tag}}" \
+          --destination="ghcr.io/${{ github.repository }}:v${{needs.tag.outputs.timestamp}}" \
           --build-arg COMMIT=$COMMIT \
           --build-arg AWS_ENDPOINT_URL_S3=$AWS_ENDPOINT_URL_S3 \
           --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
@@ -95,7 +96,7 @@ jobs:
         /kaniko/executor \
           --dockerfile="./Containerfile" \
           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
-          --destination="ghcr.io/${{ github.repository }}:v${{needs.tag.outputs.tag}}-tftp" \
+          --destination="ghcr.io/${{ github.repository }}:v${{needs.tag.outputs.timestamp}}-tftp" \
           --build-arg COMMIT=$COMMIT \
           --build-arg AWS_ENDPOINT_URL_S3=$AWS_ENDPOINT_URL_S3 \
           --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \

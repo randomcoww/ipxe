@@ -18,7 +18,19 @@ env:
   COMMIT: master
 
 jobs:
+  tag:
+    runs-on: arc-runner-${{ github.event.repository.name }}
+    container:
+      image: docker.io/library/busybox:latest
+    outputs:
+      tag: ${{ steps.tag.outputs.TAG }}
+    steps:
+    - name: Set tag
+      run: |
+        echo TAG=$(date -u +'%Y%m%d.%H%M') | tee -a "$GITHUB_OUTPUT"
   build:
+    needs:
+      - tag
     runs-on: arc-runner-${{ github.event.repository.name }}
     container:
       image: ghcr.io/randomcoww/kaniko:debug
@@ -48,7 +60,7 @@ jobs:
         /kaniko/executor \
           --dockerfile="./Containerfile" \
           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
-          --destination="ghcr.io/${{ github.repository }}:v$TAG" \
+          --destination="ghcr.io/${{ github.repository }}:v${{needs.tag.outputs.tag}}" \
           --build-arg COMMIT=$COMMIT \
           --build-arg AWS_ENDPOINT_URL_S3=$AWS_ENDPOINT_URL_S3 \
           --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
@@ -59,7 +71,7 @@ jobs:
           --push-retry 3
   build-tftp:
     needs:
-      - build
+      - tag
     runs-on: arc-runner-${{ github.event.repository.name }}
     container:
       image: ghcr.io/randomcoww/kaniko:debug
@@ -83,7 +95,7 @@ jobs:
         /kaniko/executor \
           --dockerfile="./Containerfile" \
           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
-          --destination="ghcr.io/${{ github.repository }}:v${{needs.build.outputs.TAG}}-tftp" \
+          --destination="ghcr.io/${{ github.repository }}:v${{needs.tag.outputs.tag}}-tftp" \
           --build-arg COMMIT=$COMMIT \
           --build-arg AWS_ENDPOINT_URL_S3=$AWS_ENDPOINT_URL_S3 \
           --build-arg AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \

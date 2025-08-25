@@ -21,11 +21,11 @@ RUN set -x \
 WORKDIR /ipxe/src
 COPY config/ config/local/
 
-ARG TRUSTED_CA
+ARG INTERNAL_CA_CERT
 
 RUN set -x \
   \
-  && echo -e "$TRUSTED_CA" > ca-cert.pem \
+  && echo -e "$INTERNAL_CA_CERT" > ca-cert.pem \
   && make \
     bin-$(arch)-efi/ipxe.efi \
     CERT=ca-cert.pem \

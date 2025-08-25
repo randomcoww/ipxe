@@ -86,14 +86,11 @@ jobs:
           }
         }
         EOF
-        echo -e "$TRUSTED_CA" > $DOCKER_CONFIG/distribution.crt
 
         /kaniko/executor \
           --dockerfile="./Containerfile" \
           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
           --destination="ghcr.io/${{ github.repository }}:v${{needs.tag.outputs.timestamp}}-tftp" \
-          --destination="distribution.default/${{ github.repository }}:v${{needs.tag.outputs.timestamp}}-tftp" \
-          --registry-certificate=distribution.default=$DOCKER_CONFIG/distribution.crt \
           --build-arg COMMIT=$COMMIT \
           --build-arg TRUSTED_CA="$TRUSTED_CA" \
           --skip-unused-stages \

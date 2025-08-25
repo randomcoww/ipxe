@@ -1,19 +1,3 @@
-FROM hashicorp/terraform:latest as certs
-COPY trusted_ca.tf .
-
-ARG AWS_ENDPOINT_URL_S3
-ARG AWS_ACCESS_KEY_ID
-ARG AWS_SECRET_ACCESS_KEY
-ENV AWS_ENDPOINT_URL_S3=$AWS_ENDPOINT_URL_S3
-ENV AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-ENV AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-
-RUN set -x \
-  \
-  && terraform init \
-  && terraform apply -auto-approve \
-  && cat outputs/* > ca-cert.pem
-
 FROM alpine:latest as build
 ARG COMMIT
 
@@ -36,10 +20,12 @@ RUN set -x \
 
 WORKDIR /ipxe/src
 COPY config/ config/local/
-COPY --from=certs ca-cert.pem .
+
+ARG TRUSTED_CA
 
 RUN set -x \
   \
+  && echo -e "$TRUSTED_CA" > ca-cert.pem \
   && make \
     bin-$(arch)-efi/ipxe.efi \
     CERT=ca-cert.pem \

@@ -59,7 +59,6 @@ jobs:
           --dockerfile="./Containerfile" \
           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
           --destination="ghcr.io/${{ github.repository }}:v${{needs.tag.outputs.timestamp}}" \
-          --destination="distribution.default/${{ github.repository }}:v${{needs.tag.outputs.timestamp}}" \
           --build-arg COMMIT=$COMMIT \
           --build-arg INTERNAL_CA_CERT="$INTERNAL_CA_CERT" \
           --skip-unused-stages \

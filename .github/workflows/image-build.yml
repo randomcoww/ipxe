@@ -64,6 +64,23 @@ jobs:
           --skip-unused-stages \
           --target http \
           --push-retry 3
+  cleanup:
+    needs:
+      - build
+    runs-on: arc-runner-${{ github.event.repository.name }}
+    container:
+      image: docker.io/node:current-alpine
+    permissions:
+      packages: write
+    steps:
+      - name: Remove old container images
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ github.event.repository.name }}
+          package-type: container
+          min-versions-to-keep: 4
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ignore-versions: "^v[\\d.]+-tftp$"
   build-tftp:
     needs:
       - tag
@@ -98,7 +115,6 @@ jobs:
           --push-retry 3
   cleanup:
     needs:
-      - build
       - build-tftp
     runs-on: arc-runner-${{ github.event.repository.name }}
     container:
@@ -111,5 +127,6 @@ jobs:
         with:
           package-name: ${{ github.event.repository.name }}
           package-type: container
-          min-versions-to-keep: 6
+          min-versions-to-keep: 4
           token: ${{ secrets.GITHUB_TOKEN }}
+          ignore-versions: "^v[\\d.]+$"

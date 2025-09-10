@@ -113,7 +113,7 @@ jobs:
           --skip-unused-stages \
           --target tftp \
           --push-retry 3
-  cleanup:
+  cleanup-tftp:
     needs:
       - build-tftp
     runs-on: arc-runner-${{ github.event.repository.name }}

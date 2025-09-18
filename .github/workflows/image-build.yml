@@ -37,7 +37,7 @@ jobs:
       - tag
     runs-on: arc-runner-${{ github.event.repository.name }}
     container:
-      image: ghcr.io/randomcoww/kaniko:debug
+      image: registry.default/randomcoww/kaniko:latest
     permissions:
       contents: read
       packages: write
@@ -85,7 +85,7 @@ jobs:
       - tag
     runs-on: arc-runner-${{ github.event.repository.name }}
     container:
-      image: ghcr.io/randomcoww/kaniko:debug
+      image: registry.default/randomcoww/kaniko:latest
     permissions:
       contents: read
       packages: write

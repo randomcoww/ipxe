@@ -35,26 +35,12 @@ RUN set -x \
   && mkdir -p /build \
   && mv bin-$(arch)-efi/*.efi /build/
 
-## PXE boot build
-
-FROM alpine:latest as tftp
-
-WORKDIR /var/tftpboot
-COPY --from=build --chown=nobody:nogroup /build/ .
-
-RUN set -x \
-  \
-  && apk add --no-cache \
-    tftp-hpa
-
-ENTRYPOINT [ "in.tftpd", "--foreground", "--user", "nobody", "--secure", "/var/tftpboot" ]
-
-## HTTP boot build
-
-FROM busybox:stable-musl as http
+FROM busybox:stable-musl
 
 WORKDIR /var/www
 COPY --from=build --chown=www-data:www-data /build/ .
 USER www-data
 
 ENTRYPOINT [ "httpd", "-f", "-v" ]
+# busybox also includes tftpd and may be started like this:
+# ENTRYPOINT [ "udpsvd", "-vE", "0.0.0.0", "69", "tftpd", "-r", "-u", "www-data", "/var/www" ]

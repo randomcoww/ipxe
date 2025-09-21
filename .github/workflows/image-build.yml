@@ -21,20 +21,7 @@ env:
   COMMIT: master
 
 jobs:
-  tag:
-    runs-on: arc-runner-${{ github.event.repository.name }}
-    container:
-      image: registry.default/randomcoww/kaniko:latest
-    outputs:
-      timestamp: ${{ steps.tag.outputs.TAG }}
-    steps:
-    - name: Set tag
-      id: tag
-      run: |
-        echo TAG=$(date -u +'%Y%m%d.%H%M') | tee -a "$GITHUB_OUTPUT"
   build:
-    needs:
-      - tag
     runs-on: arc-runner-${{ github.event.repository.name }}
     container:
       image: registry.default/randomcoww/kaniko:latest
@@ -42,6 +29,10 @@ jobs:
       contents: read
       packages: write
     steps:
+    - name: Set tag
+      run: |
+        echo TAG=$(date -u +'%Y%m%d.%H%M') | tee -a "$GITHUB_ENV"
+
     - name: Build and release container
       run: |
         mkdir -p $DOCKER_CONFIG
@@ -59,11 +50,10 @@ jobs:
         /kaniko/executor \
           --dockerfile="./Containerfile" \
           --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
-          --destination="ghcr.io/${{ github.repository }}:v${{needs.tag.outputs.timestamp}}" \
+          --destination="ghcr.io/${{ github.repository }}:v$TAG" \
           --registry-certificate=$INTERNAL_REGISTRY=$DOCKER_CONFIG/internal.crt \
           --build-arg COMMIT=$COMMIT \
           --build-arg INTERNAL_CA_CERT="$INTERNAL_CA_CERT" \
-          --target http \
           --use-new-run \
           --skip-unused-stages \
           --snapshot-mode=redo \
@@ -84,61 +74,6 @@ jobs:
         uses: actions/delete-package-versions@v5
         with:
           package-name: ${{ github.event.repository.name }}
-          package-type: container
-          min-versions-to-keep: 4
-          token: ${{ secrets.GITHUB_TOKEN }}
-  build-tftp:
-    needs:
-      - tag
-    runs-on: arc-runner-${{ github.event.repository.name }}
-    container:
-      image: registry.default/randomcoww/kaniko:latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-    - name: Build and release container
-      run: |
-        mkdir -p $DOCKER_CONFIG
-        cat > $DOCKER_CONFIG/config.json <<EOF
-        {
-          "auths": {
-            "ghcr.io": {
-              "auth": "$(echo -n ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} | base64 -w0)"
-            }
-          }
-        }
-        EOF
-        echo -e "$INTERNAL_CA_CERT" > $DOCKER_CONFIG/internal.crt
-
-        /kaniko/executor \
-          --dockerfile="./Containerfile" \
-          --context="${{ github.repositoryUrl }}#${{ github.ref }}#${{ github.sha }}" \
-          --destination="ghcr.io/${{ github.repository }}-tftp:v${{needs.tag.outputs.timestamp}}" \
-          --registry-certificate=$INTERNAL_REGISTRY=$DOCKER_CONFIG/internal.crt \
-          --build-arg COMMIT=$COMMIT \
-          --build-arg INTERNAL_CA_CERT="$INTERNAL_CA_CERT" \
-          --target tftp \
-          --use-new-run \
-          --skip-unused-stages \
-          --snapshot-mode=redo \
-          --cleanup \
-          --image-download-retry=4 \
-          --image-fs-extract-retry=4 \
-          --push-retry=4
-  cleanup-tftp:
-    needs:
-      - build-tftp
-    runs-on: arc-runner-${{ github.event.repository.name }}
-    container:
-      image: docker.io/node:current-alpine
-    permissions:
-      packages: write
-    steps:
-      - name: Remove old container images
-        uses: actions/delete-package-versions@v5
-        with:
-          package-name: ${{ github.event.repository.name }}-tftp
           package-type: container
           min-versions-to-keep: 4
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -19,6 +19,7 @@ concurrency:
 
 env:
   COMMIT: master
+  FF_KANIKO_SQUASH_STAGES: true # https://github.com/mzihlmann/kaniko/pull/141
 
 jobs:
   build:
@@ -31,6 +32,7 @@ jobs:
     steps:
     - name: Set tag
       run: |
+        set -e
         echo TAG=$(date -u +'%Y%m%d.%H%M') | tee -a "$GITHUB_ENV"
 
     - name: Build and release container
